@@ -170,7 +170,7 @@ export default function CategoryManager({ categories }: Props) {
               maxLength={100}
               required
               disabled={loading}
-              className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100 text-black"
+              className="w-full rounde  d-lg border border-slate-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100 text-black"
             />
           </div>
 

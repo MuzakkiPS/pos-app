@@ -31,3 +31,33 @@ export async function requireAdmin() {
 
   return { supabase, user, profile };
 }
+
+
+export async function requireUser() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    redirect("/login");
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from("users")
+    .select("id, username, role")
+    .eq("id", user.id)
+    .single();
+
+  if (profileError || !profile) {
+    redirect("/login");
+  }
+
+  if (!["admin", "cashier"].includes(profile.role)) {
+    redirect("/login");
+  }
+
+  return { supabase, user, profile };
+}

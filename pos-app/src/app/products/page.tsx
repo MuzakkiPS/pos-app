@@ -1,7 +1,7 @@
 
 import Link from "next/link";
 import { requireAdmin } from "@/src/lib/auth";
-
+import DeleteProductButton from "@/src/components/products/DeleteProductButton";
 
 
 export default async function ProductsPage() {
@@ -86,6 +86,7 @@ export default async function ProductsPage() {
                   <th className="px-5 py-4">Kategori</th>
                   <th className="px-5 py-4">Harga</th>
                   <th className="px-5 py-4">Status</th>
+                  <th className="px-5 py-4">Aksi</th>
                 </tr>
               </thead>
 
@@ -149,6 +150,22 @@ export default async function ProductsPage() {
                             : "Tidak tersedia"}
                         </span>
                       </td>
+                   <td className="px-5 py-4">
+  <div className="flex justify-end gap-2">
+    <Link
+      href={`/products/${product.id}/edit`}
+      className="rounded-md bg-amber-100 px-3 py-2 font-medium text-amber-800 hover:bg-amber-200"
+    >
+      Edit
+    </Link>
+
+    <DeleteProductButton
+      id={product.id}
+      name={product.name}
+      photo={product.photo}
+    />
+  </div>
+</td>
                     </tr>
                   );
                 })}
