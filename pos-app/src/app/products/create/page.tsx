@@ -2,6 +2,8 @@
 import Link from "next/link";
 import { requireAdmin } from "@/src/lib/auth";
 import ProductForm from "@/src/components/products/ProductForm";
+import AdminSidebar from "@/src/components/layout/TransactionSidebar";
+import TransactionSidebar from "@/src/components/layout/TransactionSidebar";
 
 export default async function CreateProductPage() {
   const { supabase } = await requireAdmin();
@@ -22,6 +24,7 @@ export default async function CreateProductPage() {
   }
 
   return (
+    <TransactionSidebar>
     <main className="min-h-screen bg-slate-100 p-6 md:p-8">
       <div className="mx-auto max-w-3xl">
         <Link
@@ -55,5 +58,6 @@ export default async function CreateProductPage() {
         </div>
       </div>
     </main>
+    </TransactionSidebar>
   );
 }

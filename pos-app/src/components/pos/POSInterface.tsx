@@ -1,8 +1,9 @@
 
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { createClient } from "@/src/lib/supabase/client";
+
 
 type Product = {
   id: number;
@@ -158,63 +159,131 @@ export default function POSInterface({ products }: Props) {
     }
   }
 
-  return (
-    <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
+  
+const [cartOpen, setCartOpen] = useState(false);
+
+// Total jumlah item di keranjang (hanya turunan dari `cart`)
+const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+
+// Tutup bottom sheet dengan tombol Escape
+useEffect(() => {
+  if (!cartOpen) return;
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "Escape") setCartOpen(false);
+  };
+  window.addEventListener("keydown", onKeyDown);
+  return () => window.removeEventListener("keydown", onKeyDown);
+}, [cartOpen]);
+
+return (
+  <>
+    {/* pb-28 memberi ruang agar konten tidak tertutup sticky bar di mobile */}
+    <div className="grid gap-6 pb-28 lg:grid-cols-[1.5fr_1fr] lg:pb-0">
       {/* Daftar Menu */}
-      <section className="rounded-xl bg-white p-5 shadow-sm">
-        <h2 className="text-xl font-bold text-slate-800">
-          Daftar Menu
-        </h2>
+      <section className="rounded-xl bg-white p-4 shadow-sm sm:p-5">
+        <h2 className="text-xl font-bold text-slate-800">Daftar Menu</h2>
 
         {products.length === 0 ? (
           <p className="mt-6 rounded-lg bg-slate-50 p-6 text-center text-slate-500">
             Belum ada produk yang tersedia untuk dijual.
           </p>
         ) : (
-          <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
-            {products.map((product) => (
-              <button
-                key={product.id}
-                type="button"
-                onClick={() => addProduct(product)}
-                disabled={loading}
-                className="overflow-hidden rounded-xl border border-slate-200 text-left transition hover:border-blue-400 hover:shadow-md disabled:opacity-50"
-              >
-                {product.photo ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={product.photo}
-                    alt={product.name}
-                    className="h-32 w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-32 items-center justify-center bg-slate-100 text-sm text-slate-400">
-                    Tidak ada foto
-                  </div>
-                )}
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+            {products.map((product) => {
+              const inCartQty =
+                cart.find((item) => item.product.id === product.id)
+                  ?.quantity ?? 0;
 
-                <div className="p-3">
-                  <p className="font-semibold text-slate-800">
-                    {product.name}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-500">
-                    {product.category}
-                  </p>
-                  <p className="mt-2 font-bold text-blue-600">
-                    {formatRupiah(product.price)}
-                  </p>
-                </div>
-              </button>
-            ))}
+              return (
+                <button
+                  key={product.id}
+                  type="button"
+                  onClick={() => addProduct(product)}
+                  disabled={loading}
+                  className={`relative overflow-hidden rounded-xl border text-left transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:opacity-50 ${
+                    inCartQty > 0
+                      ? "border-blue-500 ring-1 ring-blue-500"
+                      : "border-slate-200 hover:border-blue-400"
+                  }`}
+                >
+                  {inCartQty > 0 && (
+                    <span
+                      className="absolute right-2 top-2 z-10 flex h-7 min-w-7 items-center justify-center rounded-full bg-blue-600 px-2 text-sm font-bold text-white shadow"
+                      aria-label={`${inCartQty} di keranjang`}
+                    >
+                      {inCartQty}
+                    </span>
+                  )}
+
+                  {product.photo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={product.photo}
+                      alt={product.name}
+                      className="h-28 w-full object-cover sm:h-32"
+                    />
+                  ) : (
+                    <div className="flex h-28 items-center justify-center bg-slate-100 text-sm text-slate-400 sm:h-32">
+                      Tidak ada foto
+                    </div>
+                  )}
+
+                  <div className="p-3">
+                    <p className="font-semibold text-slate-800">
+                      {product.name}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {product.category}
+                    </p>
+                    <p className="mt-2 font-bold text-blue-600">
+                      {formatRupiah(product.price)}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         )}
       </section>
 
-      {/* Keranjang */}
-      <section className="h-fit rounded-xl bg-white p-5 shadow-sm">
-        <h2 className="text-xl font-bold text-slate-800">
-          Keranjang Belanja
-        </h2>
+      {/* Backdrop bottom sheet (hanya mobile) */}
+      <div
+        onClick={() => setCartOpen(false)}
+        aria-hidden="true"
+        className={`fixed inset-0 z-40 bg-slate-900/50 transition-opacity lg:hidden ${
+          cartOpen ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      />
+
+      {/*
+        Keranjang: SATU elemen saja (tidak diduplikasi), sehingga id="cash"
+        tetap unik. Mobile = bottom sheet, desktop (lg+) = kolom kanan.
+      */}
+      <aside
+        role="dialog"
+        aria-label="Keranjang Belanja"
+        className={`fixed inset-x-0 bottom-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-2xl bg-white p-4 shadow-2xl transition-[transform,visibility] duration-300 sm:p-5 lg:visible lg:static lg:top-6 lg:z-auto lg:h-fit lg:max-h-none lg:translate-y-0 lg:self-start lg:overflow-visible lg:rounded-xl lg:shadow-sm ${
+          cartOpen ? "visible translate-y-0" : "invisible translate-y-full"
+        } lg:sticky`}
+      >
+        {/* Handle + tombol tutup (hanya mobile) */}
+        <div className="mb-3 flex items-center justify-between lg:hidden">
+          <span className="mx-auto h-1.5 w-12 rounded-full bg-slate-300" />
+        </div>
+
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold text-slate-800">
+            Keranjang Belanja
+          </h2>
+          <button
+            type="button"
+            onClick={() => setCartOpen(false)}
+            className="rounded-md px-3 py-1 text-sm font-medium text-slate-600 hover:bg-slate-100 lg:hidden"
+          >
+            Tutup
+          </button>
+        </div>
 
         {cart.length === 0 ? (
           <p className="mt-5 rounded-lg bg-slate-50 p-6 text-center text-slate-500">
@@ -251,35 +320,31 @@ export default function POSInterface({ products }: Props) {
                   <div className="flex items-center gap-3">
                     <button
                       type="button"
-                      onClick={() =>
-                        updateQuantity(item.product.id, -1)
-                      }
+                      onClick={() => updateQuantity(item.product.id, -1)}
                       disabled={loading}
-                      className="h-8 w-8 rounded-md bg-slate-100 font-bold"
+                      aria-label={`Kurangi ${item.product.name}`}
+                      className="h-9 w-9 rounded-md bg-slate-100 font-bold"
                     >
                       -
                     </button>
 
-                    <span className="font-semibold">
+                    <span className="min-w-6 text-center font-semibold">
                       {item.quantity}
                     </span>
 
                     <button
                       type="button"
-                      onClick={() =>
-                        updateQuantity(item.product.id, 1)
-                      }
+                      onClick={() => updateQuantity(item.product.id, 1)}
                       disabled={loading}
-                      className="h-8 w-8 rounded-md bg-slate-100 font-bold"
+                      aria-label={`Tambah ${item.product.name}`}
+                      className="h-9 w-9 rounded-md bg-slate-100 font-bold"
                     >
                       +
                     </button>
                   </div>
 
                   <p className="font-semibold text-slate-800">
-                    {formatRupiah(
-                      item.product.price * item.quantity
-                    )}
+                    {formatRupiah(item.product.price * item.quantity)}
                   </p>
                 </div>
               </div>
@@ -306,6 +371,7 @@ export default function POSInterface({ products }: Props) {
             <input
               id="cash"
               type="number"
+              inputMode="numeric"
               min="0"
               step="1"
               value={cash}
@@ -319,20 +385,24 @@ export default function POSInterface({ products }: Props) {
           <div className="flex justify-between">
             <span className="text-slate-600">Kembalian</span>
             <span className="font-bold text-green-700">
-              {formatRupiah(
-                cart.length > 0 && change >= 0 ? change : 0
-              )}
+              {formatRupiah(cart.length > 0 && change >= 0 ? change : 0)}
             </span>
           </div>
 
           {errorMessage && (
-            <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+            <p
+              role="alert"
+              className="rounded-lg bg-red-50 p-3 text-sm text-red-700"
+            >
               {errorMessage}
             </p>
           )}
 
           {message && (
-            <p role="status" className="rounded-lg bg-green-50 p-3 text-sm text-green-700">
+            <p
+              role="status"
+              className="rounded-lg bg-green-50 p-3 text-sm text-green-700"
+            >
               {message}
             </p>
           )}
@@ -354,9 +424,7 @@ export default function POSInterface({ products }: Props) {
 
         {receipt && (
           <div className="mt-5 rounded-xl border border-green-200 bg-green-50 p-4">
-            <h3 className="font-bold text-green-800">
-              Transaksi Berhasil!
-            </h3>
+            <h3 className="font-bold text-green-800">Transaksi Berhasil!</h3>
             <p className="mt-2 text-sm text-green-700">
               Nomor transaksi: #{receipt.id}
             </p>
@@ -371,7 +439,39 @@ export default function POSInterface({ products }: Props) {
             </p>
           </div>
         )}
-      </section>
+      </aside>
     </div>
-  );
+
+    {/* Sticky bottom bar (hanya mobile) */}
+    <div
+      className={`fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white px-4 pt-3 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] pb-[calc(0.75rem+env(safe-area-inset-bottom))] lg:hidden ${
+        cartOpen ? "invisible" : ""
+      }`}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-xs text-slate-500">
+            {totalItems} item di keranjang
+          </p>
+          <p className="text-lg font-bold text-slate-900">
+            {formatRupiah(total)}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setCartOpen(true)}
+          className="relative rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
+        >
+          Keranjang
+          {totalItems > 0 && (
+            <span className="absolute -right-2 -top-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-bold text-white">
+              {totalItems}
+            </span>
+          )}
+        </button>
+      </div>
+    </div>
+  </>
+);
 }

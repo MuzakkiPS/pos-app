@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/src/lib/auth";
 import ProductForm from "@/src/components/products/ProductForm";
+import AdminSidebar from "@/src/components/layout/TransactionSidebar";
+import TransactionSidebar from "@/src/components/layout/TransactionSidebar";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -57,6 +59,7 @@ export default async function EditProductPage({ params }: Props) {
   }
 
   return (
+    <TransactionSidebar>
     <main className="min-h-screen bg-slate-100 p-6 md:p-8">
       <div className="mx-auto max-w-3xl">
         <Link
@@ -93,5 +96,6 @@ export default async function EditProductPage({ params }: Props) {
         </div>
       </div>
     </main>
+    </TransactionSidebar>
   );
 }

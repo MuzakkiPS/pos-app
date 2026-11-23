@@ -190,7 +190,7 @@ export default function ProductForm({ categories, product }: Props) {
           maxLength={150}
           required
           disabled={loading}
-          className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+          className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-blue-500 text-black"
         />
       </div>
 
@@ -204,7 +204,7 @@ export default function ProductForm({ categories, product }: Props) {
           onChange={(e) => setCategoryId(e.target.value)}
           required
           disabled={loading}
-          className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 outline-none focus:border-blue-500"
+          className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 outline-none focus:border-blue-500 text-black"
         >
           <option value="">Pilih kategori</option>
           {categories.map((category) => (
@@ -229,7 +229,7 @@ export default function ProductForm({ categories, product }: Props) {
           placeholder="Contoh: 15000"
           required
           disabled={loading}
-          className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+          className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-blue-500 text-black"
         />
       </div>
 
@@ -243,7 +243,7 @@ export default function ProductForm({ categories, product }: Props) {
           accept="image/jpeg,image/png,image/webp"
           disabled={loading}
           onChange={(e) => setPhoto(e.target.files?.[0] ?? null)}
-          className="w-full rounded-lg border border-slate-300 p-3 text-sm"
+          className="w-full rounded-lg border border-slate-300 p-3 text-sm text-black"
         />
 
         {(preview || existingPhotoUrl) && (

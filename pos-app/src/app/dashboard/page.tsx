@@ -1,10 +1,13 @@
 
 import { requireAdmin } from "@/src/lib/auth";
+import AdminSidebar from "@/src/components/layout/TransactionSidebar";
+import TransactionSidebar from "@/src/components/layout/TransactionSidebar";
 
 export default async function DashboardPage() {
   const { profile } = await requireAdmin();
 
   return (
+    <TransactionSidebar>
     <main className="min-h-screen bg-slate-100 p-8">
       <div className="mx-auto max-w-5xl">
         <p className="text-sm text-slate-500">
@@ -42,8 +45,10 @@ export default async function DashboardPage() {
               Admin
             </p>
           </div>
+          
         </div>
       </div>
     </main>
+    </TransactionSidebar>
   );
 }

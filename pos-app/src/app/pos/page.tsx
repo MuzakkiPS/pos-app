@@ -1,6 +1,8 @@
 
 import { requireUser } from "@/src/lib/auth";
 import POSInterface from "@/src/components/pos/POSInterface";
+import CashierSidebar from "@/src/components/layout/TransactionSidebar";
+import TransactionSidebar from "@/src/components/layout/TransactionSidebar";
 
 export default async function POSPage() {
   const { supabase, profile } = await requireUser();
@@ -59,6 +61,7 @@ export default async function POSPage() {
   });
 
   return (
+    <TransactionSidebar>
     <main className="min-h-screen bg-slate-100 p-4 md:p-8">
       <div className="mx-auto max-w-7xl">
         <div className="mb-6">
@@ -78,5 +81,6 @@ export default async function POSPage() {
         <POSInterface products={menu} />
       </div>
     </main>
+    </TransactionSidebar>
   );
 }
