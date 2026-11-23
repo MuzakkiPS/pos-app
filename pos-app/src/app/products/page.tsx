@@ -5,7 +5,6 @@ import DeleteProductButton from "@/src/components/products/DeleteProductButton";
 import AdminSidebar from "@/src/components/layout/TransactionSidebar";
 import TransactionSidebar from "@/src/components/layout/TransactionSidebar";
 
-
 export default async function ProductsPage() {
   const { supabase } = await requireAdmin();
 
